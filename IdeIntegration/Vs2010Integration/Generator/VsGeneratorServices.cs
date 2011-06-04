@@ -4,18 +4,19 @@ using EnvDTE;
 using TechTalk.SpecFlow.Generator;
 using TechTalk.SpecFlow.Generator.Configuration;
 using TechTalk.SpecFlow.Generator.Interfaces;
+using TechTalk.SpecFlow.IdeIntegration.Tracing;
 using TechTalk.SpecFlow.Vs2010Integration.LanguageService;
 using TechTalk.SpecFlow.Vs2010Integration.Tracing;
 using TechTalk.SpecFlow.Vs2010Integration.Utils;
 
 namespace TechTalk.SpecFlow.Vs2010Integration.Generator
 {
-    internal class VsGeneratorServices : VsRemoteGeneratorServices
+    internal class VsGeneratorServices : RemoteGeneratorServices
     {
-//        protected readonly Project project;
+        protected readonly Project project;
         private readonly ISpecFlowConfigurationReader configurationReader;
 
-//        public VsGeneratorServices(Project project, IVisualStudioTracer visualStudioTracer) : base(
+        public VsGeneratorServices(Project project, ISpecFlowConfigurationReader configurationReader, IIdeTracer tracer) : base(
 //            new TestGeneratorFactory(), //TODO: load through DI
 //            false)
 //        {
@@ -24,9 +25,11 @@ namespace TechTalk.SpecFlow.Vs2010Integration.Generator
 //        }
         public VsGeneratorServices(Project project, IVisualStudioTracer visualStudioTracer) : base(
             new TestGeneratorFactory(), //TODO: load through DI
-            false, project, visualStudioTracer)
+            new RemoteAppDomainTestGeneratorFactory(tracer), //TODO: load through DI
+            new VsGeneratorInfoProvider(project, tracer, configurationReader), //TODO: load through DI
+            tracer, false)
         {
-            this.configurationReader = new VsSpecFlowConfigurationReader(); //TODO: load through DI
+            this.configurationReader = configurationReader;
         }
 
         protected override ProjectSettings GetProjectSettings()
@@ -59,7 +62,7 @@ namespace TechTalk.SpecFlow.Vs2010Integration.Generator
                     throw new NotSupportedException("target language not supported");
             }
 
-            var configurationHolder = configurationReader.ReadConfiguration(new VsProjectReference(project));
+            var configurationHolder = configurationReader.ReadConfiguration();
             return new ProjectSettings
                        {
                            ProjectName = Path.GetFileNameWithoutExtension(project.FullName),
