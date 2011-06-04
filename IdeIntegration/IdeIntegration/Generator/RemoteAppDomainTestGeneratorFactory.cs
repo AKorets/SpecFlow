@@ -48,7 +48,6 @@ namespace TechTalk.SpecFlow.IdeIntegration.Generator
         {
             this.tracer = tracer;
             this.remoteGeneratorAssemblyName = typeof(ITestGeneratorFactory).Assembly.GetName().Name;
-            this.remoteGeneratorAssemblyName = typeof(ITestGeneratorFactory).Assembly.GetName().Name;
         }
 
         public void Setup(string newGeneratorFolder)
